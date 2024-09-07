@@ -6,7 +6,7 @@ require github.com/gofiber/fiber/v3 v3.0.0-beta.3
 
 require (
 	github.com/andybalholm/brotli v1.1.0 // indirect
-	github.com/gofiber/utils/v2 v2.0.0-beta.4 // indirect
+	github.com/gofiber/utils/v2 v2.0.0-beta.6 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/klauspost/compress v1.17.9 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
