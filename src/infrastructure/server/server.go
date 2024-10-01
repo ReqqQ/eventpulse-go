@@ -14,7 +14,7 @@ func PrepareServerConfig() (ui.Controllers, *fiber.App) {
 		return nil, nil
 	}
 	server := fiber.New()
-	//createSecurity(server)
+	createSecurity(server)
 
 	return app, server
 }

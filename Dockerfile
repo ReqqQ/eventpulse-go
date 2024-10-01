@@ -1,25 +1,28 @@
 # Użyj obrazu Golang
-FROM golang:1.23
+FROM golang:1.23-alpine
+RUN apk update && apk add git openssh
 
-# Ustaw katalog roboczy
-WORKDIR /app
+# Skopiuj klucze SSH do kontenera (lokalizacja na Windowsie)
+COPY ./.ssh /root/.ssh
 
-# Skopiuj lokalny moduł eventpulse-user-go do /app/eventpulse-user-go
-COPY ./eventpulse-user-go /app/eventpulse-user-go
+# Ustawienia uprawnień dla kluczy SSH
+RUN chmod 600 /root/.ssh/id_rsa && chmod 600 /root/.ssh/id_rsa.pub
+
+# Skonfiguruj Git do używania SSH zamiast HTTPS
+RUN git config --global url."git@github.com:".insteadOf "https://github.com/"
 
 # Skopiuj pliki go.mod i go.sum oraz pobierz zależności
-COPY ./backend/go.mod ./backend/go.sum ./
-RUN go mod edit -replace github.com/ReqqQ/eventpulse-user-go=/app/eventpulse-user-go
+COPY go.mod go.sum ./
 RUN go mod download
 
-# Skopiuj resztę kodu aplikacji backend
-COPY ./backend /app
+# Skopiuj resztę kodu aplikacji
+COPY . .
 
-# Zbuduj aplikację Go
+# Zbuduj aplikację
 RUN go build -o main .
 
-# Eksponuj port aplikacji Fiber
+# Eksponuj port aplikacji
 EXPOSE 8080
 
-# Uruchom aplikację Fiber
+# Uruchom aplikację
 CMD ["./main"]

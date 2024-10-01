@@ -1,1 +1,4 @@
 .idea
+.ssh
+.env
+.certs
