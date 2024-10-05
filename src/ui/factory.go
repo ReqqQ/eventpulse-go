@@ -1,37 +1,50 @@
 package ui
 
 import (
-	"github.com/ReqqQ/eventpulse-user-go/src/app/user"
+	"github.com/ReqqQ/eventpulse-user-go/src/shared"
 	"github.com/gofiber/fiber/v3"
 )
 
-type Controllers interface {
-	GetUserController() UserController
+type Server interface {
 	InitRoutes(app *fiber.App)
+	GetApps() App
 }
-type UserController interface {
-	GetAppService() user.UserService
-}
-type controllersImpl struct {
-	userController UserController
+type UserApp interface {
+	GetUserBus() shared.Bus
 }
 
-func (c *controllersImpl) GetUserController() UserController {
-	return c.userController
+type appImpl struct {
+	userApp UserApp
 }
 
-type userControllersImpl struct {
-	userApp user.UserService
+type serverImpl struct {
+	apps App
+}
+type userAppImpl struct {
+	bus shared.Bus
 }
 
-func (c *userControllersImpl) GetAppService() user.UserService {
-	return c.userApp
+type App interface {
+	GetUserApp() UserApp
 }
 
-func BuildControllers(uc UserController) Controllers {
-	return &controllersImpl{userController: uc}
+func (u *userAppImpl) GetUserBus() shared.Bus {
+	return u.bus
+}
+func (a *appImpl) GetUserApp() UserApp {
+	return a.userApp
+}
+func (s *serverImpl) GetApps() App {
+	return s.apps
+}
+func BuildServer(apps App) Server {
+	return &serverImpl{apps: apps}
 }
 
-func BuildUserController(uc user.UserService) UserController {
-	return &userControllersImpl{userApp: uc}
+func BuildApp(userApp UserApp) App {
+	return &appImpl{userApp: userApp}
+}
+
+func BuildUserApp(bus shared.Bus) UserApp {
+	return &userAppImpl{bus: bus}
 }

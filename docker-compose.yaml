@@ -13,7 +13,7 @@ services:
     networks:
       - app_network
     depends_on:
-      - backend  # Ensure HAProxy waits for backend service
+      - backend
 
   backend:
     build:
@@ -27,27 +27,68 @@ services:
       - DB_USER=eventpulse
       - DB_PASSWORD=eventpulsepassword
       - DB_NAME=eventpulse
+      - KAFKA_HOST=kafka
+      - KAFKA_PORT=9092
     depends_on:
-      - db  # Ensure Go waits for database service
+      - scylla
+      - kafka
 
-  db:
-    image: postgres:latest
-    container_name: eventpulse-db
+  scylla:
+    image: scylladb/scylla:latest
+    container_name: eventpulse-scylla
     environment:
-      POSTGRES_USER: eventpulse
-      POSTGRES_PASSWORD: eventpulsepassword
-      POSTGRES_DB: eventpulse
+      - SCYLLA_DB_USER=eventpulse
+      - SCYLLA_DB_PASSWORD=eventpulsepassword
+      - SCYLLA_DB_NAME=eventpulse
     volumes:
-      - db_data:/var/lib/postgresql/data  # Persistent volume for database
+      - scylla_data:/var/lib/scylla  # Persistent volume for ScyllaDB data
     networks:
       - app_network
     ports:
-      - "5432:5432"
+      - "9042:9042"  # CQL port for connecting to ScyllaDB
+      - "9160:9160"  # Thrift port
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - app_network
+    ports:
+      - "2181:2181"
+    volumes:
+      - zookeeper_data:/var/lib/zookeeper
+
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    container_name: kafka
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENERS: INTERNAL://kafka:9093,EXTERNAL://0.0.0.0:9092
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9093,EXTERNAL://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    networks:
+      - app_network
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    volumes:
+      - kafka_data:/var/lib/kafka/data
 
 networks:
   app_network:
     driver: bridge
 
 volumes:
-  db_data:
-    external: false  # This will create a persistent volume managed by Docker
+  scylla_data:
+    external: false
+  zookeeper_data:
+    external: false
+  kafka_data:
+    external: false

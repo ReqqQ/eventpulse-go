@@ -8,14 +8,26 @@ package di
 
 import (
 	"github.com/ReqqQ/eventpulse-go/src/ui"
-	"github.com/ReqqQ/eventpulse-user-go/src/app/user"
+	user2 "github.com/ReqqQ/eventpulse-user-go/src/app/user"
+	"github.com/ReqqQ/eventpulse-user-go/src/domain/user"
+	"github.com/ReqqQ/eventpulse-user-go/src/infrastructure/users"
+	"github.com/ReqqQ/eventpulse-user-go/src/shared"
+	"github.com/google/wire"
 )
 
 // Injectors from di_container.go:
 
-func InitDIContainer() ui.Controllers {
-	userService := user.BuildUserService()
-	userController := ui.BuildUserController(userService)
-	controllers := ui.BuildControllers(userController)
-	return controllers
+func InitDIContainer() ui.Server {
+	factory := user.BuildFactory()
+	repository := users.CreateRepository(factory)
+	userHandler := user2.CreateQueryHandler(repository)
+	bus := shared.CreateUserBusInstance(userHandler)
+	userApp := ui.BuildUserApp(bus)
+	app := ui.BuildApp(userApp)
+	server := ui.BuildServer(app)
+	return server
 }
+
+// di_container.go:
+
+var buildUserApp = wire.NewSet(shared.CreateUserBusInstance, user2.CreateQueryHandler, users.CreateRepository, user.BuildFactory)

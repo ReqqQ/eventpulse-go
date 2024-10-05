@@ -1,17 +1,8 @@
 package ui
 
 import (
-	"context"
-	"database/sql"
-	models "github.com/ReqqQ/eventpulse-user-go/src/infrastructure/users/ORM"
-	"github.com/go-resty/resty/v2"
+	"github.com/ThreeDotsLabs/watermill/pubsub/gochannel"
 	"github.com/gofiber/fiber/v3"
-	"github.com/gofrs/uuid"
-	_ "github.com/lib/pq"
-	"github.com/volatiletech/null/v8"
-	"github.com/volatiletech/sqlboiler/v4/boil"
-	"strings"
-	"time"
 )
 
 type FBTokenUser struct {
@@ -22,73 +13,91 @@ type FBUser struct {
 	Name string `json:"name"`
 }
 
-func (cb *controllersImpl) InitRoutes(app *fiber.App) {
-	app.Get("/user/login", func(c fiber.Ctx) error {
-		link := cb.GetUserController().GetAppService().LoginBySocial()
+type GetUserToken struct {
+	userId string
+}
 
-		return c.Redirect().To(link)
+func (g GetUserToken) GetQueryUserId() string {
+	return g.userId
+}
+func (g GetUserToken) GetType() string {
+	return "GetUserToken"
+}
+
+var PubSub *gochannel.GoChannel
+
+func (a *serverImpl) InitRoutes(app *fiber.App) {
+	app.Get("/user/login", func(c fiber.Ctx) error {
+		//link := a.GetUserController().GetAppService().LoginBySocial()
+
+		return c.Redirect().To("")
+	})
+	app.Get("/user/get", func(c fiber.Ctx) error {
+		//msg := message.NewMessage(watermill.NewUUID(), []byte(fmt.Sprintf("Wiadomość %d", i)))
+		//err := PubSub.Publish("query.user", msg)
+		//if err != nil {
+		//	panic(err)
+		//}
+		//messages, err := PubSub.Subscribe("query.user.result")
+		//if err != nil {
+		//	return err
+		//}
+		//for msg := range messages {
+		//	msg.Payload
+		//}
+		return c.JSON("get")
 	})
 	app.Get("/user/token", func(c fiber.Ctx) error {
-		client := resty.New()
-		client2 := client.Clone()
-		//t := c.Queries()
-		//fmt.Println(t)
-		fBTokenUser := new(FBTokenUser)
-		client.R().
-			SetResult(&fBTokenUser).
-			Get(cb.GetUserController().GetAppService().GetToken(c.Query("code")))
-		fBUser := new(FBUser)
-		client2.R().
-			SetResult(&fBUser).
-			SetHeader("Accept", "application/json").
-			Get("https://graph.facebook.com/v20.0/me?fields=id,name&access_token=" + fBTokenUser.AccessToken)
+		//client := resty.New()
+		//fBTokenUser := new(FBTokenUser)
+		//client.R().
+		//	SetResult(&fBTokenUser).
+		//	Get(a.GetUserController().GetAppService().GetToken(c.Query("code")))
+		//fBUser := new(FBUser)
+		//client.R().
+		//	SetResult(&fBUser).
+		//	SetHeader("Accept", "application/json").
+		//	Get("https://graph.facebook.com/v20.0/me?fields=id,name&access_token=" + fBTokenUser.AccessToken)
+		//
+		//userUUID := uuid.NewV5(uuid.NamespaceURL, fBUser.Id)
+		//userData := strings.Split(fBUser.Name, " ")
+		//cluster := gocql.NewCluster("localhost")
+		//cluster.Port = 9042
+		//cluster.Keyspace = "omniloop"
+		//cluster.Consistency = gocql.One
+		//
+		//session, err := cluster.CreateSession()
+		//if err != nil {
+		//	return err
+		//}
+		//uu, _ := gocql.ParseUUID(userUUID.String())
+		//defer session.Close()
+		//userEntity := models.UsersStruct{
+		//	UserId:    uu,
+		//	Name:      userData[0],
+		//	Surname:   userData[1],
+		//	CreatedAt: time.Now(),
+		//}
+		//stmt, names := qb.Insert("users").Columns("user_id", "name", "surname", "created_at").ToCql()
+		//q := gocqlx.Query(session.Query(stmt), names).BindStruct(userEntity)
+		//err = q.ExecRelease()
+		//if err != nil {
+		//	return err
+		//}
 
-		db, err := sql.Open("postgres", "postgres://eventpulse:eventpulsepassword@localhost:5432/eventpulse?sslmode=disable")
-		if err != nil {
-			return err
-		}
-		boil.SetDB(db)
-		userUUID := uuid.NewV5(uuid.NamespaceURL, fBUser.Id)
-		if err != nil {
-			return err
-		}
-		userExists, err := models.Users(models.UserWhere.ID.EQ(userUUID.String())).ExistsG(context.Background())
-		if err != nil {
-			return err
-		}
-		if userExists {
-			return c.Redirect().To("http://localhost:3000/")
-		}
-		userData := strings.Split(fBUser.Name, " ")
-
-		user := models.User{
-			ID:        userUUID.String(),
-			Name:      userData[0],
-			Surname:   null.StringFrom(userData[1]),
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
-		}
-		user.InsertG(context.Background(), boil.Infer())
 		return c.Redirect().To("http://localhost:3000/")
 	})
-	app.Get("/api/user", func(c fiber.Ctx) error {
-		db, err := sql.Open("postgres", "postgres://eventpulse:eventpulsepassword@localhost:5432/eventpulse?sslmode=disable")
-		if err != nil {
-			return err
-		}
+	app.Get("/user", func(c fiber.Ctx) error {
+		data := a.GetApps().GetUserApp().GetUserBus().HandleQuery(GetUserToken{userId: c.Query("userId")})
 
-		boil.SetDB(db)
-
-		users, err := models.Users().AllG(context.Background())
-
-		return c.JSON(users)
+		return c.JSON(data.GetData())
 	})
 	app.Post("/api/session", func(c fiber.Ctx) error {
 
 		return c.JSON("Store")
 	})
 	app.Get("/api/session", func(c fiber.Ctx) error {
-		//cb.GetUserController().GetAppService().LoginBySocial()
+		//a.GetUserController().GetAppService().LoginBySocial()
 		r := struct {
 			Data string
 		}{
