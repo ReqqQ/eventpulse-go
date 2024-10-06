@@ -13,25 +13,26 @@ services:
     networks:
       - app_network
     depends_on:
-      - backend
-
-  backend:
-    build:
-      context: ./  # Path to your Go backend Dockerfile
-      dockerfile: Dockerfile  # Dockerfile for Go backend
-    container_name: go-backend
-    networks:
-      - app_network
-    environment:
-      - DB_HOST=eventpulse-db
-      - DB_USER=eventpulse
-      - DB_PASSWORD=eventpulsepassword
-      - DB_NAME=eventpulse
-      - KAFKA_HOST=kafka
-      - KAFKA_PORT=9092
-    depends_on:
       - scylla
       - kafka
+
+  #  backend:
+  #    build:
+  #      context: ./  # Path to your Go backend Dockerfile
+  #      dockerfile: Dockerfile  # Dockerfile for Go backend
+  #    container_name: go-backend
+  #    networks:
+  #      - app_network
+  #    environment:
+  #      - DB_HOST=eventpulse-db
+  #      - DB_USER=eventpulse
+  #      - DB_PASSWORD=eventpulsepassword
+  #      - DB_NAME=eventpulse
+  #      - KAFKA_HOST=kafka
+  #      - KAFKA_PORT=9092
+  #    depends_on:
+  #      - scylla
+  #      - kafka
 
   scylla:
     image: scylladb/scylla:latest

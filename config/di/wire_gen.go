@@ -12,6 +12,7 @@ import (
 	ui2 "github.com/ReqqQ/eventpulse-go/src/ui"
 	user2 "github.com/ReqqQ/eventpulse-user-go/src/app/user"
 	"github.com/ReqqQ/eventpulse-user-go/src/domain/user"
+	"github.com/ReqqQ/eventpulse-user-go/src/infrastructure/facebook"
 	"github.com/ReqqQ/eventpulse-user-go/src/infrastructure/users"
 	"github.com/ReqqQ/eventpulse-user-go/src/shared"
 	"github.com/google/wire"
@@ -22,7 +23,9 @@ import (
 func InitDIContainer() app.Server {
 	factory := user.BuildFactory()
 	repository := users.CreateRepository(factory)
-	userHandler := user2.CreateQueryHandler(repository)
+	apiFacebookRepository := facebook.BuildApiFacebookRepository()
+	service := user.BuildService()
+	userHandler := user2.CreateQueryHandler(repository, apiFacebookRepository, service)
 	bus := shared.CreateUserBusInstance(userHandler)
 	userFactory := ui.BuildUserFactory()
 	userApp := app.BuildUserApp(bus, userFactory)
@@ -33,4 +36,6 @@ func InitDIContainer() app.Server {
 
 // di_container.go:
 
-var buildUserApp = wire.NewSet(shared.CreateUserBusInstance, user2.CreateQueryHandler, users.CreateRepository, user.BuildFactory)
+var userInterfaceFacebookRepository = wire.NewSet(facebook.BuildApiFacebookRepository, wire.Bind(new(user2.FacebookRepository), new(facebook.ApiFacebookRepository)))
+
+var buildUserApp = wire.NewSet(shared.CreateUserBusInstance, user2.CreateQueryHandler, users.CreateRepository, user.BuildFactory, user.BuildService, userInterfaceFacebookRepository)

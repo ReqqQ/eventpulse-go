@@ -4,7 +4,8 @@ package di
 import (
 	appUser "github.com/ReqqQ/eventpulse-user-go/src/app/user"
 	domainUser "github.com/ReqqQ/eventpulse-user-go/src/domain/user"
-	infrastructureUser "github.com/ReqqQ/eventpulse-user-go/src/infrastructure/users"
+	userInfrastructureFacebook "github.com/ReqqQ/eventpulse-user-go/src/infrastructure/facebook"
+	userInfrastructureUser "github.com/ReqqQ/eventpulse-user-go/src/infrastructure/users"
 	"github.com/ReqqQ/eventpulse-user-go/src/shared"
 	"github.com/google/wire"
 
@@ -13,11 +14,18 @@ import (
 	"github.com/ReqqQ/eventpulse-go/src/ui"
 )
 
+var userInterfaceFacebookRepository = wire.NewSet(
+	userInfrastructureFacebook.BuildApiFacebookRepository,
+	wire.Bind(new(appUser.FacebookRepository), new(userInfrastructureFacebook.ApiFacebookRepository)),
+)
+
 var buildUserApp = wire.NewSet(
 	shared.CreateUserBusInstance,
 	appUser.CreateQueryHandler,
-	infrastructureUser.CreateRepository,
+	userInfrastructureUser.CreateRepository,
 	domainUser.BuildFactory,
+	domainUser.BuildService,
+	userInterfaceFacebookRepository,
 )
 
 func InitDIContainer() app.Server {

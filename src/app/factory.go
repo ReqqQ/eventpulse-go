@@ -21,6 +21,7 @@ type appImpl struct {
 
 type UserFactory interface {
 	GetUserQuery(userId string) user.GetUserQuery
+	GetLoginDialogQuery(socialType string) user.GetLoginDialogQuery
 }
 
 type userAppImpl struct {
