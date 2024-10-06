@@ -1,50 +1,25 @@
 package ui
 
 import (
-	"github.com/ReqqQ/eventpulse-user-go/src/shared"
-	"github.com/gofiber/fiber/v3"
+	"github.com/ReqqQ/eventpulse-go/src/app"
 )
 
-type Server interface {
-	InitRoutes(app *fiber.App)
-	GetApps() App
+type FBTokenUser struct {
+	AccessToken string `json:"access_token"`
 }
-type UserApp interface {
-	GetUserBus() shared.Bus
-}
-
-type appImpl struct {
-	userApp UserApp
+type FBUser struct {
+	Id   string `json:"id"`
+	Name string `json:"name"`
 }
 
 type serverImpl struct {
-	apps App
-}
-type userAppImpl struct {
-	bus shared.Bus
+	apps app.App
 }
 
-type App interface {
-	GetUserApp() UserApp
-}
-
-func (u *userAppImpl) GetUserBus() shared.Bus {
-	return u.bus
-}
-func (a *appImpl) GetUserApp() UserApp {
-	return a.userApp
-}
-func (s *serverImpl) GetApps() App {
+func (s *serverImpl) GetApps() app.App {
 	return s.apps
 }
-func BuildServer(apps App) Server {
+
+func BuildServer(apps app.App) app.Server {
 	return &serverImpl{apps: apps}
-}
-
-func BuildApp(userApp UserApp) App {
-	return &appImpl{userApp: userApp}
-}
-
-func BuildUserApp(bus shared.Bus) UserApp {
-	return &userAppImpl{bus: bus}
 }

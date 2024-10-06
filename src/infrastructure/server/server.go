@@ -1,15 +1,18 @@
 package server
 
 import (
+	"github.com/ReqqQ/eventpulse-user-go/src/shared"
+	"github.com/gocql/gocql"
 	"github.com/gofiber/fiber/v3"
 	"github.com/joho/godotenv"
 
-	"github.com/ReqqQ/eventpulse-go/src/infrastructure/server/di"
-	"github.com/ReqqQ/eventpulse-go/src/ui"
+	"github.com/ReqqQ/eventpulse-go/config/di"
+	"github.com/ReqqQ/eventpulse-go/src/app"
 )
 
-func PrepareServerConfig() (ui.Server, *fiber.App) {
-	app := di.InitDIContainer()
+func PrepareServerConfig() (app.Server, *fiber.App) {
+	container := di.InitDIContainer()
+	prepareDB()
 	err := godotenv.Load(".env")
 	if err != nil {
 		return nil, nil
@@ -17,34 +20,16 @@ func PrepareServerConfig() (ui.Server, *fiber.App) {
 	server := fiber.New()
 	createSecurity(server)
 
-	return app, server
+	return container, server
 }
 
-func InitHandlers() {
-	//router, err := message.NewRouter(message.RouterConfig{}, watermill.NewStdLogger(false, false))
-	//if err != nil {
-	//	panic(err)
-	//}
-	//ui.PubSub = gochannel.NewGoChannel(gochannel.Config{
-	//	OutputChannelBuffer:            100,
-	//	BlockPublishUntilSubscriberAck: false,
-	//}, watermill.NewStdLogger(false, false))
-	//
-	//router.AddHandler(
-	//	"userQueryHandler",
-	//	"query.user",
-	//	ui.PubSub,
-	//	"query.user.result",
-	//	ui.PubSub,
-	//	new(user.QueryHandler).Handler,
-	//)
-	//
-	//go func() {
-	//	err := router.Run(context.Background())
-	//	if err != nil {
-	//		panic(err)
-	//	}
-	//}()
+func prepareDB() {
+	cluster := gocql.NewCluster("localhost")
+	cluster.Port = 9042
+	cluster.Keyspace = "omniloop"
+	cluster.Consistency = gocql.One
+
+	shared.SetDBCluster(cluster)
 }
 
 func StartServer(app *fiber.App) {

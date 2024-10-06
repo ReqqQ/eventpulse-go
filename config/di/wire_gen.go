@@ -7,7 +7,9 @@
 package di
 
 import (
-	"github.com/ReqqQ/eventpulse-go/src/ui"
+	"github.com/ReqqQ/eventpulse-go/src/app"
+	"github.com/ReqqQ/eventpulse-go/src/infrastructure/user"
+	ui2 "github.com/ReqqQ/eventpulse-go/src/ui"
 	user2 "github.com/ReqqQ/eventpulse-user-go/src/app/user"
 	"github.com/ReqqQ/eventpulse-user-go/src/domain/user"
 	"github.com/ReqqQ/eventpulse-user-go/src/infrastructure/users"
@@ -17,14 +19,15 @@ import (
 
 // Injectors from di_container.go:
 
-func InitDIContainer() ui.Server {
+func InitDIContainer() app.Server {
 	factory := user.BuildFactory()
 	repository := users.CreateRepository(factory)
 	userHandler := user2.CreateQueryHandler(repository)
 	bus := shared.CreateUserBusInstance(userHandler)
-	userApp := ui.BuildUserApp(bus)
-	app := ui.BuildApp(userApp)
-	server := ui.BuildServer(app)
+	userFactory := ui.BuildUserFactory()
+	userApp := app.BuildUserApp(bus, userFactory)
+	appApp := app.BuildApp(userApp)
+	server := ui2.BuildServer(appApp)
 	return server
 }
 

@@ -1,30 +1,9 @@
 package ui
 
 import (
-	"github.com/ThreeDotsLabs/watermill/pubsub/gochannel"
+	_ "github.com/ThreeDotsLabs/watermill/pubsub/gochannel"
 	"github.com/gofiber/fiber/v3"
 )
-
-type FBTokenUser struct {
-	AccessToken string `json:"access_token"`
-}
-type FBUser struct {
-	Id   string `json:"id"`
-	Name string `json:"name"`
-}
-
-type GetUserToken struct {
-	userId string
-}
-
-func (g GetUserToken) GetQueryUserId() string {
-	return g.userId
-}
-func (g GetUserToken) GetType() string {
-	return "GetUserToken"
-}
-
-var PubSub *gochannel.GoChannel
 
 func (a *serverImpl) InitRoutes(app *fiber.App) {
 	app.Get("/user/login", func(c fiber.Ctx) error {
@@ -88,21 +67,9 @@ func (a *serverImpl) InitRoutes(app *fiber.App) {
 		return c.Redirect().To("http://localhost:3000/")
 	})
 	app.Get("/user", func(c fiber.Ctx) error {
-		data := a.GetApps().GetUserApp().GetUserBus().HandleQuery(GetUserToken{userId: c.Query("userId")})
+		userApp := a.GetApps().GetUserApp()
+		data := userApp.GetUserBus().HandleQuery(userApp.GetUserFactory().GetUserQuery(c.Query("userId")))
 
 		return c.JSON(data.GetData())
-	})
-	app.Post("/api/session", func(c fiber.Ctx) error {
-
-		return c.JSON("Store")
-	})
-	app.Get("/api/session", func(c fiber.Ctx) error {
-		//a.GetUserController().GetAppService().LoginBySocial()
-		r := struct {
-			Data string
-		}{
-			Data: "is logged",
-		}
-		return c.JSON(r)
 	})
 }

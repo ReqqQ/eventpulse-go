@@ -2,22 +2,20 @@ module github.com/ReqqQ/eventpulse-go
 
 go 1.23.1
 
+replace github.com/ReqqQ/eventpulse-user-go => ../eventpulse-user-go
+
 require (
 	github.com/ReqqQ/eventpulse-user-go v0.1.0
-	github.com/go-resty/resty/v2 v2.15.3
+	github.com/ThreeDotsLabs/watermill v1.3.7
 	github.com/gocql/gocql v1.7.0
 	github.com/gofiber/fiber/v3 v3.0.0-beta.3
-	github.com/gofrs/uuid v4.4.0+incompatible
 	github.com/google/wire v0.6.0
 	github.com/joho/godotenv v1.5.1
-	github.com/scylladb/gocqlx v1.5.0
-	github.com/scylladb/gocqlx/v3 v3.0.1
 )
 
 require (
-	github.com/ThreeDotsLabs/watermill v1.3.7 // indirect
 	github.com/andybalholm/brotli v1.1.0 // indirect
-	github.com/gofiber/utils/v2 v2.0.0-beta.4 // indirect
+	github.com/gofiber/utils/v2 v2.0.0-beta.6 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/hailocab/go-hostpool v0.0.0-20160125115350-e80d13ce29ed // indirect
@@ -28,12 +26,10 @@ require (
 	github.com/oklog/ulid v1.3.1 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/scylladb/go-reflectx v1.0.1 // indirect
+	github.com/scylladb/gocqlx/v3 v3.0.1 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
-	github.com/valyala/fasthttp v1.55.0 // indirect
+	github.com/valyala/fasthttp v1.56.0 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect
-	golang.org/x/net v0.27.0 // indirect
-	golang.org/x/sys v0.24.0 // indirect
+	golang.org/x/sys v0.26.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 )
-
-replace github.com/ReqqQ/eventpulse-user-go => ../eventpulse-user-go

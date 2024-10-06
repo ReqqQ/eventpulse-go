@@ -8,6 +8,8 @@ import (
 	"github.com/ReqqQ/eventpulse-user-go/src/shared"
 	"github.com/google/wire"
 
+	"github.com/ReqqQ/eventpulse-go/src/app"
+	appInfrastructure "github.com/ReqqQ/eventpulse-go/src/infrastructure/user"
 	"github.com/ReqqQ/eventpulse-go/src/ui"
 )
 
@@ -18,12 +20,13 @@ var buildUserApp = wire.NewSet(
 	domainUser.BuildFactory,
 )
 
-func InitDIContainer() ui.Server {
+func InitDIContainer() app.Server {
 	wire.Build(
 		wire.NewSet(
 			ui.BuildServer,
-			ui.BuildApp,
-			ui.BuildUserApp,
+			app.BuildApp,
+			app.BuildUserApp,
+			appInfrastructure.BuildUserFactory,
 			buildUserApp,
 		),
 	)
