@@ -5,7 +5,7 @@ import (
 )
 
 func main() {
-	controller, fiberApp := server.PrepareServerConfig()
-	controller.InitRoutes(fiberApp)
+	_, fiberApp := server.PrepareServerConfig()
+	//controller.InitRoutes(fiberApp)
 	server.StartServer(fiberApp)
 }
