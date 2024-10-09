@@ -5,10 +5,12 @@ import (
 	"github.com/ReqqQ/eventpulse-user-go/src/app/user/command"
 	"github.com/ReqqQ/eventpulse-user-go/src/app/user/handler"
 	"github.com/ReqqQ/eventpulse-user-go/src/app/user/query"
-	domainUserFactory "github.com/ReqqQ/eventpulse-user-go/src/domain/user/factory"
+	userAppRepository "github.com/ReqqQ/eventpulse-user-go/src/app/user/repository"
+	userDomainRepository "github.com/ReqqQ/eventpulse-user-go/src/domain/facebook/repository"
+	userDomainFactory "github.com/ReqqQ/eventpulse-user-go/src/domain/user/factory"
 	"github.com/ReqqQ/eventpulse-user-go/src/domain/user/service"
-	"github.com/ReqqQ/eventpulse-user-go/src/infrastructure/facebook"
-	infrastructureUserFactory "github.com/ReqqQ/eventpulse-user-go/src/infrastructure/users/factory"
+	userFacebookRepository "github.com/ReqqQ/eventpulse-user-go/src/infrastructure/facebook/repository"
+	userFactory "github.com/ReqqQ/eventpulse-user-go/src/infrastructure/users/factory"
 	"github.com/ReqqQ/eventpulse-user-go/src/infrastructure/users/repository"
 	"github.com/ReqqQ/eventpulse-user-go/src/shared"
 	"github.com/google/wire"
@@ -21,12 +23,23 @@ var buildUserApp = wire.NewSet(
 	query.BuildUserQueryHandler,
 	command.BuildCommandQueryHandler,
 	repository.BuildUserRepository,
-	domainUserFactory.BuildFactory,
-	facebook.BuildApiFacebookRepository,
+	userDomainFactory.BuildFactory,
+	userFacebookRepository.BuildApiFacebookRepository,
 	service.BuildService,
-	infrastructureUserFactory.BuildUserFactory,
+	userFactory.BuildUserFactory,
+	InitializeAppFacebookRepository,
+	InitializeDomainFacebookRepository,
 )
 
+func InitializeAppFacebookRepository() userAppRepository.FacebookRepository {
+	wire.Build(userFacebookRepository.BuildApiFacebookRepository, userFacebookRepository.BuildAppFacebookRepository)
+	return nil
+}
+
+func InitializeDomainFacebookRepository() userDomainRepository.FacebookRepository {
+	wire.Build(userFacebookRepository.BuildApiFacebookRepository, userFacebookRepository.BuildDomainFacebookRepository)
+	return nil
+}
 func InitDIContainer() routes.Routes {
 	wire.Build(
 		wire.NewSet(
