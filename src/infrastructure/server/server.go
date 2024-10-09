@@ -10,10 +10,10 @@ import (
 	"github.com/scylladb/gocqlx/v3"
 
 	"github.com/ReqqQ/eventpulse-go/config/di"
-	"github.com/ReqqQ/eventpulse-go/src/app"
+	"github.com/ReqqQ/eventpulse-go/src/ui/routes"
 )
 
-func PrepareServerConfig() (app.Server, *fiber.App) {
+func PrepareServerConfig() (routes.Routes, *fiber.App) {
 	container := di.InitDIContainer()
 	prepareDB()
 	err := godotenv.Load(".env")

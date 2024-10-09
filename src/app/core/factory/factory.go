@@ -1,10 +1,10 @@
 package factory
 
 import (
-	"github.com/ReqqQ/eventpulse-user-go/src/app/user/query"
+	"github.com/ReqqQ/eventpulse-user-go/src/app/user/handler/interfaces"
 )
 
 type UserFactory interface {
-	GetLoginDialogQuery(socialType string) query.GetLoginDialogQuery
-	GetUserQuery(userId string) query.GetUserQuery
+	GetLoginDialogQuery(socialType string) interfaces.GetLoginDialogQuery
+	GetUserQuery(userId string) interfaces.GetUserQuery
 }

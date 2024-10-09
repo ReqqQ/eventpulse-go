@@ -1,7 +1,7 @@
 package factory
 
 import (
-	"github.com/ReqqQ/eventpulse-user-go/src/app/user/query"
+	"github.com/ReqqQ/eventpulse-user-go/src/app/user/handler/interfaces"
 
 	"github.com/ReqqQ/eventpulse-go/src/app/core/factory"
 )
@@ -37,11 +37,11 @@ func (g getLoginDialogQuery) GetSocialType() string {
 
 type userFactory struct{}
 
-func (u *userFactory) GetLoginDialogQuery(socialType string) query.GetLoginDialogQuery {
+func (u *userFactory) GetLoginDialogQuery(socialType string) interfaces.GetLoginDialogQuery {
 	return getLoginDialogQuery{socialType: socialType}
 }
 
-func (u *userFactory) GetUserQuery(userId string) query.GetUserQuery {
+func (u *userFactory) GetUserQuery(userId string) interfaces.GetUserQuery {
 	return getUserQuery{userId: userId}
 }
 

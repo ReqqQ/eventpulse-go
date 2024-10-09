@@ -11,12 +11,16 @@ import (
 	"github.com/ReqqQ/eventpulse-go/src/app/core/factory"
 )
 
-type routes struct {
+type Routes interface {
+	InitRoutes(app *fiber.App)
+}
+
+type routesImpl struct {
 	userApp     shared.Bus
 	userFactory factory.UserFactory
 }
 
-func (r *routes) InitRoutes(app *fiber.App) {
+func (r *routesImpl) InitRoutes(app *fiber.App) {
 	app.Get("/user/dialog", func(c fiber.Ctx) error {
 		dto := r.userApp.HandleQuery(r.userFactory.GetLoginDialogQuery(c.Query("socialType"))).(userDTO.GetLoginDialogDTO)
 
@@ -122,6 +126,12 @@ func (r *routes) InitRoutes(app *fiber.App) {
 	//})
 
 	//go cons()
+}
+func BuildRoutes(userApp shared.Bus, userFactory factory.UserFactory) Routes {
+	return &routesImpl{
+		userApp:     userApp,
+		userFactory: userFactory,
+	}
 }
 
 //func cons() {
