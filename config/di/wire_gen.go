@@ -7,17 +7,17 @@
 package di
 
 import (
-	factory3 "github.com/ReqqQ/eventpulse-go/src/infrastructure/user/factory"
+	"github.com/ReqqQ/eventpulse-go/src/infrastructure/user/factory"
 	"github.com/ReqqQ/eventpulse-go/src/ui/routes"
 	"github.com/ReqqQ/eventpulse-user-go/src/app/user/command"
 	"github.com/ReqqQ/eventpulse-user-go/src/app/user/handler"
 	"github.com/ReqqQ/eventpulse-user-go/src/app/user/query"
 	"github.com/ReqqQ/eventpulse-user-go/src/app/user/repository"
 	repository3 "github.com/ReqqQ/eventpulse-user-go/src/domain/facebook/repository"
-	"github.com/ReqqQ/eventpulse-user-go/src/domain/user/factory"
-	"github.com/ReqqQ/eventpulse-user-go/src/domain/user/service"
+	"github.com/ReqqQ/eventpulse-user-go/src/domain/user/entity"
+	"github.com/ReqqQ/eventpulse-user-go/src/domain/user/service/user"
 	repository2 "github.com/ReqqQ/eventpulse-user-go/src/infrastructure/facebook/repository"
-	factory2 "github.com/ReqqQ/eventpulse-user-go/src/infrastructure/users/factory"
+	"github.com/ReqqQ/eventpulse-user-go/src/infrastructure/users/dto"
 	repository4 "github.com/ReqqQ/eventpulse-user-go/src/infrastructure/users/repository"
 	"github.com/ReqqQ/eventpulse-user-go/src/shared"
 	"github.com/google/wire"
@@ -38,23 +38,23 @@ func InitializeDomainFacebookRepository() repository3.FacebookRepository {
 }
 
 func InitDIContainer() routes.Routes {
-	factoryFactory := factory.BuildFactory()
-	userRepository := repository4.BuildUserRepository(factoryFactory)
+	entityFactory := entity.BuildFactory()
+	userRepository := repository4.BuildUserRepository(entityFactory)
 	facebookRepository := InitializeAppFacebookRepository()
-	serviceService := service.BuildService()
-	userFactory := factory2.BuildUserFactory()
-	userQueryHandler := query.BuildUserQueryHandler(userRepository, facebookRepository, serviceService, userFactory)
+	service := user.BuildService(userRepository, entityFactory)
+	userDTOFactory := dto.BuildUserFactory()
+	userQueryHandler := query.BuildUserQueryHandler(userRepository, facebookRepository, service, userDTOFactory)
 	repositoryFacebookRepository := InitializeDomainFacebookRepository()
-	userCommandHandler := command.BuildCommandQueryHandler(repositoryFacebookRepository)
+	userCommandHandler := command.BuildCommandQueryHandler(repositoryFacebookRepository, service)
 	userBus := handler.BuildUserBus(userQueryHandler, userCommandHandler)
 	bus := shared.BuildBus(userBus)
-	factoryUserFactory := factory3.BuildFactory()
-	routesRoutes := routes.BuildRoutes(bus, factoryUserFactory)
+	userFactory := factory.BuildFactory()
+	routesRoutes := routes.BuildRoutes(bus, userFactory)
 	return routesRoutes
 }
 
 // di_container.go:
 
-var buildUserApp = wire.NewSet(query.BuildUserQueryHandler, command.BuildCommandQueryHandler, repository4.BuildUserRepository, factory.BuildFactory, repository2.BuildApiFacebookRepository, service.BuildService, factory2.BuildUserFactory, InitializeAppFacebookRepository,
+var buildUserApp = wire.NewSet(query.BuildUserQueryHandler, command.BuildCommandQueryHandler, repository4.BuildUserRepository, entity.BuildFactory, repository2.BuildApiFacebookRepository, user.BuildService, dto.BuildUserFactory, InitializeAppFacebookRepository,
 	InitializeDomainFacebookRepository,
 )

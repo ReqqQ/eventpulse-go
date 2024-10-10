@@ -7,10 +7,10 @@ import (
 	"github.com/ReqqQ/eventpulse-user-go/src/app/user/query"
 	userAppRepository "github.com/ReqqQ/eventpulse-user-go/src/app/user/repository"
 	userDomainRepository "github.com/ReqqQ/eventpulse-user-go/src/domain/facebook/repository"
-	userDomainFactory "github.com/ReqqQ/eventpulse-user-go/src/domain/user/factory"
-	"github.com/ReqqQ/eventpulse-user-go/src/domain/user/service"
+	"github.com/ReqqQ/eventpulse-user-go/src/domain/user/entity"
+	"github.com/ReqqQ/eventpulse-user-go/src/domain/user/service/user"
 	userFacebookRepository "github.com/ReqqQ/eventpulse-user-go/src/infrastructure/facebook/repository"
-	userFactory "github.com/ReqqQ/eventpulse-user-go/src/infrastructure/users/factory"
+	"github.com/ReqqQ/eventpulse-user-go/src/infrastructure/users/dto"
 	"github.com/ReqqQ/eventpulse-user-go/src/infrastructure/users/repository"
 	"github.com/ReqqQ/eventpulse-user-go/src/shared"
 	"github.com/google/wire"
@@ -23,10 +23,10 @@ var buildUserApp = wire.NewSet(
 	query.BuildUserQueryHandler,
 	command.BuildCommandQueryHandler,
 	repository.BuildUserRepository,
-	userDomainFactory.BuildFactory,
+	entity.BuildFactory,
 	userFacebookRepository.BuildApiFacebookRepository,
-	service.BuildService,
-	userFactory.BuildUserFactory,
+	user.BuildService,
+	dto.BuildUserFactory,
 	InitializeAppFacebookRepository,
 	InitializeDomainFacebookRepository,
 )
